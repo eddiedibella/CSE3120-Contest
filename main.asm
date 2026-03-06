@@ -7,11 +7,15 @@ INCLUDE Irvine32.inc
 .data
 	x BYTE "O",0
 	eyes BYTE ":",0
+	blank BYTE " ", 0
 .code
 main PROC
 	
 	; initialize the snake
 	call initSnake
+
+	; initialize the bounds of the map
+	call initMap
 
 	; recommended next steps
 
@@ -45,27 +49,86 @@ initSnake PROC
 	mov dh, 15
 	mov dl, 60
 	call GotoXY
-	; write the string x (or the char X
+	; write the string O
 	mov al, x
 	call WriteChar
 
-	; move cursor to row 15 col 60
+	; move cursor to row 15 col 61
 	mov dh, 15
 	mov dl, 61
 	call GotoXY
-	; write the string x (or the char X
+	; write the string O
 	mov al, x
 	call WriteChar
-	; move cursor to row 15 col 60
+	; move cursor to row 15 col 62
 	mov dh, 15
 	mov dl, 62
 	call GotoXY
-	; write the string x (or the char X
+	; write the string :
 	mov al, eyes
 	
 	call WriteChar
 
 	ret
 initSnake ENDP
+
+initMap PROC
+; This procedure initializes the map bounds (colored in yellow)
+
+; Set text color to green on yellow background
+	mov eax, green + (yellow*16)
+	call SetTextColor 
+
+	; iterate across the columns (120 of them)
+	mov ecx, 119
+	mov bl, 1
+TopBar:
+	; move cursor to row 1 col 1, then move right
+	mov dh, 1
+	mov dl, bl
+	call GotoXY
+	; write the string space
+	mov al, blank
+	call WriteChar
+
+	inc bl
+	dec ecx
+	jnz TopBar
+
+
+	; iterate across the rows (30 of them)
+	mov ecx, 28
+	mov bl, 1
+RightBar:
+	; move cursor to row 1 col 119, then go down
+	mov dh, bl
+	mov dl, 119
+	call GotoXY
+	; write the string space
+	mov al, blank
+	call WriteChar
+
+	inc bl
+	dec ecx
+	jnz RightBar
+
+	; move cursor to row 15 col 61
+	;mov dh, 15
+	;mov dl, 61
+	;call GotoXY
+	; write the string O
+	;mov al, x
+	;call WriteChar
+	; move cursor to row 15 col 62
+	;mov dh, 15
+	;mov dl, 62
+	;call GotoXY
+	; write the string :
+	;mov al, eyes
+	
+	;call WriteChar
+
+	ret
+initMap ENDP
 
 END main
