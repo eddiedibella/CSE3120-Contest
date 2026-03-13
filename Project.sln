@@ -1,0 +1,67 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36915.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project", "Project.vcxproj", "{4164AA65-1EF9-4E69-899B-D1BED776070B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AsmLibrary", "AsmLibrary", "{41DB566B-B20A-461C-B900-6EA6BF1180EA}"
+	ProjectSection(SolutionItems) = preProject
+		6.2T3.asm = 6.2T3.asm
+		AddTwo.asm = AddTwo.asm
+		addvariables.asm = addvariables.asm
+		ArrayScan.asm = ArrayScan.asm
+		bssarrays.asm = bssarrays.asm
+		centerX.asm = centerX.asm
+		Encrypt.asm = Encrypt.asm
+		..\..\..\..\Irvine\ch06\32 bit\Finite.asm = ..\..\..\..\Irvine\ch06\32 bit\Finite.asm
+		FirstProgram.asm = FirstProgram.asm
+		initializedarrays.asm = initializedarrays.asm
+		L06_1_SwapCase.asm = L06_1_SwapCase.asm
+		L07_01_sqrt.asm = L07_01_sqrt.asm
+		L4_1_T1.asm = L4_1_T1.asm
+		L4_1_T2.asm = L4_1_T2.asm
+		L4_1_T3.asm = L4_1_T3.asm
+		L5_1_T1.asm = L5_1_T1.asm
+		L5_1_T2.asm = L5_1_T2.asm
+		L5_1_T3.asm = L5_1_T3.asm
+		L5_1_T4.asm = L5_1_T4.asm
+		L5_1_T5a.asm = L5_1_T5a.asm
+		L5_2_T1.asm = L5_2_T1.asm
+		L5_2_T1c.asm = L5_2_T1c.asm
+		L5_2_T3.asm = L5_2_T3.asm
+		L6.1T2.asm = L6.1T2.asm
+		..\..\..\..\Irvine\ch08\32 bit\L8_01_T1.asm = ..\..\..\..\Irvine\ch08\32 bit\L8_01_T1.asm
+		..\..\..\..\Irvine\ch08\32 bit\L8_01_T1b.asm = ..\..\..\..\Irvine\ch08\32 bit\L8_01_T1b.asm
+		L8_01_T2.asm = L8_01_T2.asm
+		L8_2_T1.asm = L8_2_T1.asm
+		main.asm = main.asm
+		MyAddTwo.asm = MyAddTwo.asm
+		prac.asm = prac.asm
+		..\..\..\..\Irvine\ch06\32 bit\SetCur.asm = ..\..\..\..\Irvine\ch06\32 bit\SetCur.asm
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Snake", "Snake\Snake.vcxproj", "{C8E7CEB9-EE19-4402-80F4-FCD9C09691FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4164AA65-1EF9-4E69-899B-D1BED776070B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4164AA65-1EF9-4E69-899B-D1BED776070B}.Debug|Win32.Build.0 = Debug|Win32
+		{4164AA65-1EF9-4E69-899B-D1BED776070B}.Release|Win32.ActiveCfg = Release|Win32
+		{4164AA65-1EF9-4E69-899B-D1BED776070B}.Release|Win32.Build.0 = Release|Win32
+		{C8E7CEB9-EE19-4402-80F4-FCD9C09691FE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C8E7CEB9-EE19-4402-80F4-FCD9C09691FE}.Debug|Win32.Build.0 = Debug|Win32
+		{C8E7CEB9-EE19-4402-80F4-FCD9C09691FE}.Release|Win32.ActiveCfg = Release|Win32
+		{C8E7CEB9-EE19-4402-80F4-FCD9C09691FE}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8A3E3DB7-6B3F-4889-AC0F-087B0EEC9465}
+	EndGlobalSection
+EndGlobal

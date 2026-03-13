@@ -4,7 +4,7 @@
 
 INCLUDE Irvine32.inc
 
-.data
+.data 
 	x BYTE "O",0
 	eyes BYTE ":",0
 	blank BYTE " ", 0
