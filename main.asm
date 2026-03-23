@@ -8,6 +8,9 @@ INCLUDE Irvine32.inc
 	x BYTE "O",0
 	eyes BYTE ":",0
 	blank BYTE " ", 0
+	snakePOS WORD 0h
+	sysTime SYSTEMTIME <>
+	currCOL BYTE 0h
 .code
 main PROC
 	
@@ -15,11 +18,17 @@ main PROC
 	call initSnake
 
 	; initialize the bounds of the map
+	; BOUNDS
+	; 0 < col <= 119
+	; 0 < row <= 28
 	call initMap
+
+	; initialize the snake moving 1 pixel per second to the right
+	call moveSnake
 
 	; recommended next steps
 
-	; initialize the snake moving 1 pixel per second to the right
+
 
 	; add bounds so the snake dies if it touches the wall
 
@@ -64,6 +73,9 @@ initSnake PROC
 	call GotoXY
 	; write the string :
 	mov al, eyes
+
+	; this is where the eyes are, so now copy that to the snakePOS variable
+	mov snakePOS, dx
 	
 	call WriteChar
 
@@ -142,24 +154,74 @@ LeftBar:
 	dec ecx
 	jnz LeftBar
 
-
-	; move cursor to row 15 col 61
-	;mov dh, 15
-	;mov dl, 61
-	;call GotoXY
-	; write the string O
-	;mov al, x
-	;call WriteChar
-	; move cursor to row 15 col 62
-	;mov dh, 15
-	;mov dl, 62
-	;call GotoXY
-	; write the string :
-	;mov al, eyes
-	
-	;call WriteChar
+	; Set text color to green on black background
+	mov eax, green + (black*16)
+	call SetTextColor
 
 	ret
 initMap ENDP
+
+
+
+; initialize the snake moving 1 pixel per second to the right
+moveSnake PROC
+	; retrieve the current seconds (ch 10)
+	INVOKE GetLocalTime, ADDR sysTime
+	movzx eax, sysTime.wSecond
+	; get the next second
+	mov ebx, eax
+	inc ebx
+	;call WriteDec
+
+
+	; while statement for 1 second delay
+	mov ecx, 1
+go:
+	INVOKE GetLocalTime, ADDR sysTime
+	movzx eax, sysTime.wSecond
+	;call WriteDec
+;delay:
+	; code to make a 1 second delay
+	; check if a second has passed
+	cmp eax, ebx
+	; if a second has passed end the delay
+	jz enddelay
+	; if not, wait again
+	jmp go
+
+enddelay:
+	; update ebx to be eax +1
+	mov ebx, eax
+	inc ebx
+
+	; code to move snake
+	mov dx, snakePOS
+
+	;row stays the same, but change col
+	inc dl
+	call GotoXY
+	; write the string eyes
+	mov al, eyes
+	call WriteChar
+
+	; save current snake position
+	mov snakePOS, dx
+	call debug
+
+jmp go
+endwhile:
+	ret
+moveSnake ENDP
+
+debug PROC
+	push dx
+	mov dh, 0
+	mov dl, 0
+	call GotoXY
+	pop dx
+	call DumpRegs
+	ret
+debug ENDP
+
 
 END main

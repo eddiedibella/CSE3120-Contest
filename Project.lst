@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.44.35222.0	    03/23/26 12:33:34
+Microsoft (R) Macro Assembler Version 14.44.35222.0	    03/23/26 15:48:08
 main.asm						     Page 1 - 1
 
 
@@ -29,20 +29,29 @@ main.asm						     Page 1 - 1
  00000000 4F 00				x BYTE "O",0
  00000002 3A 00				eyes BYTE ":",0
  00000004 20 00				blank BYTE " ", 0
+ 00000006 0000				snakePOS WORD 0h
+ 00000008 0000 0000 0000		sysTime SYSTEMTIME <>
+	   0000 0000 0000
+	   0000 0000
+ 00000018 00				currCOL BYTE 0h
  00000000			.code
  00000000			main PROC
 					
 					; initialize the snake
- 00000000  E8 0000000C			call initSnake
+ 00000000  E8 00000011			call initSnake
 
 					; initialize the bounds of the map
- 00000005  E8 00000050			call initMap
+					; BOUNDS
+					; 0 < col <= 119
+					; 0 < row <= 28
+ 00000005  E8 0000005C			call initMap
+
+					; initialize the snake moving 1 pixel per second to the right
+ 0000000A  E8 000000E8			call moveSnake
 
 					; recommended next steps
 
-					; initialize the bounds of the map
 
-					; initialize the snake moving 1 pixel per second to the right
 
 					; add bounds so the snake dies if it touches the wall
 
@@ -54,108 +63,203 @@ main.asm						     Page 1 - 1
 
 
 					exit
- 0000000A  6A 00	   *	    push   +000000000h
- 0000000C  E8 00000000 E   *	    call   ExitProcess
- 00000011			main ENDP
+ 0000000F  6A 00	   *	    push   +000000000h
+ 00000011  E8 00000000 E   *	    call   ExitProcess
+ 00000016			main ENDP
 
 
- 00000011			initSnake PROC
+ 00000016			initSnake PROC
 				; This procedure initializes the snake in the middle of the screen
 
 				; Set text color to green on black background
- 00000011  B8 00000002			mov eax, green + (black*16)
- 00000016  E8 00000000 E		call SetTextColor 
+ 00000016  B8 00000002			mov eax, green + (black*16)
+ 0000001B  E8 00000000 E		call SetTextColor 
 
 					; clear the screen
- 0000001B  E8 00000000 E		call Clrscr
+ 00000020  E8 00000000 E		call Clrscr
 					; move cursor to row 15 col 60
- 00000020  B6 0F			mov dh, 15
- 00000022  B2 3C			mov dl, 60
- 00000024  E8 00000000 E		call GotoXY
+ 00000025  B6 0F			mov dh, 15
+ 00000027  B2 3C			mov dl, 60
+ 00000029  E8 00000000 E		call GotoXY
 					; write the string O
- 00000029  A0 00000000 R		mov al, x
- 0000002E  E8 00000000 E		call WriteChar
+ 0000002E  A0 00000000 R		mov al, x
+ 00000033  E8 00000000 E		call WriteChar
 
 					; move cursor to row 15 col 61
- 00000033  B6 0F			mov dh, 15
- 00000035  B2 3D			mov dl, 61
- 00000037  E8 00000000 E		call GotoXY
+ 00000038  B6 0F			mov dh, 15
+ 0000003A  B2 3D			mov dl, 61
+ 0000003C  E8 00000000 E		call GotoXY
 					; write the string O
- 0000003C  A0 00000000 R		mov al, x
- 00000041  E8 00000000 E		call WriteChar
+ 00000041  A0 00000000 R		mov al, x
+ 00000046  E8 00000000 E		call WriteChar
 					; move cursor to row 15 col 62
- 00000046  B6 0F			mov dh, 15
- 00000048  B2 3E			mov dl, 62
- 0000004A  E8 00000000 E		call GotoXY
+ 0000004B  B6 0F			mov dh, 15
+ 0000004D  B2 3E			mov dl, 62
+ 0000004F  E8 00000000 E		call GotoXY
 					; write the string :
- 0000004F  A0 00000002 R		mov al, eyes
+ 00000054  A0 00000002 R		mov al, eyes
+
+					; this is where the eyes are, so now copy that to the snakePOS variable
+ 00000059  66| 89 15			mov snakePOS, dx
+	   00000006 R
 					
- 00000054  E8 00000000 E		call WriteChar
+ 00000060  E8 00000000 E		call WriteChar
 
- 00000059  C3				ret
- 0000005A			initSnake ENDP
+ 00000065  C3				ret
+ 00000066			initSnake ENDP
 
- 0000005A			initMap PROC
+ 00000066			initMap PROC
 				; This procedure initializes the map bounds (colored in yellow)
 
 				; Set text color to green on yellow background
- 0000005A  B8 000000E2			mov eax, green + (yellow*16)
- 0000005F  E8 00000000 E		call SetTextColor 
+ 00000066  B8 000000E2			mov eax, green + (yellow*16)
+ 0000006B  E8 00000000 E		call SetTextColor 
 
 					; iterate across the columns (120 of them)
- 00000064  B9 00000077			mov ecx, 119
- 00000069  B3 01			mov bl, 1
- 0000006B			TopBar:
+ 00000070  B9 00000077			mov ecx, 119
+ 00000075  B3 01			mov bl, 1
+ 00000077			TopBar:
 					; move cursor to row 1 col 1, then move right
- 0000006B  B6 01			mov dh, 1
- 0000006D  8A D3			mov dl, bl
- 0000006F  E8 00000000 E		call GotoXY
+ 00000077  B6 01			mov dh, 1
+ 00000079  8A D3			mov dl, bl
+ 0000007B  E8 00000000 E		call GotoXY
 					; write the string space
- 00000074  A0 00000004 R		mov al, blank
- 00000079  E8 00000000 E		call WriteChar
+ 00000080  A0 00000004 R		mov al, blank
+ 00000085  E8 00000000 E		call WriteChar
 
- 0000007E  FE C3			inc bl
- 00000080  49				dec ecx
- 00000081  75 E8			jnz TopBar
+ 0000008A  FE C3			inc bl
+ 0000008C  49				dec ecx
+ 0000008D  75 E8			jnz TopBar
 
 
 					; iterate across the rows (30 of them)
- 00000083  B9 0000001C			mov ecx, 28
- 00000088  B3 01			mov bl, 1
- 0000008A			RightBar:
+ 0000008F  B9 0000001C			mov ecx, 28
+ 00000094  B3 01			mov bl, 1
+ 00000096			RightBar:
 					; move cursor to row 1 col 119, then go down
- 0000008A  8A F3			mov dh, bl
- 0000008C  B2 77			mov dl, 119
- 0000008E  E8 00000000 E		call GotoXY
+ 00000096  8A F3			mov dh, bl
+ 00000098  B2 77			mov dl, 119
+ 0000009A  E8 00000000 E		call GotoXY
 					; write the string space
- 00000093  A0 00000004 R		mov al, blank
- 00000098  E8 00000000 E		call WriteChar
+ 0000009F  A0 00000004 R		mov al, blank
+ 000000A4  E8 00000000 E		call WriteChar
 
- 0000009D  FE C3			inc bl
- 0000009F  49				dec ecx
- 000000A0  75 E8			jnz RightBar
+ 000000A9  FE C3			inc bl
+ 000000AB  49				dec ecx
+ 000000AC  75 E8			jnz RightBar
 
-					; move cursor to row 15 col 61
-					;mov dh, 15
-					;mov dl, 61
-					;call GotoXY
-					; write the string O
-					;mov al, x
-					;call WriteChar
-					; move cursor to row 15 col 62
-					;mov dh, 15
-					;mov dl, 62
-					;call GotoXY
-					; write the string :
-					;mov al, eyes
-					
-					;call WriteChar
+					; iterate across the columns (120 of them)
+ 000000AE  B9 00000077			mov ecx, 119
+ 000000B3  B3 77			mov bl, 119
+ 000000B5			BottomBar:
+					; move cursor to row 30 col 120, then move left
+ 000000B5  B6 1C			mov dh, 28
+ 000000B7  8A D3			mov dl, bl
+ 000000B9  E8 00000000 E		call GotoXY
+					; write the string space
+ 000000BE  A0 00000004 R		mov al, blank
+ 000000C3  E8 00000000 E		call WriteChar
 
- 000000A2  C3				ret
- 000000A3			initMap ENDP
+ 000000C8  FE CB			dec bl
+ 000000CA  49				dec ecx
+ 000000CB  75 E8			jnz BottomBar
+
+					; iterate across the rows (30 of them)
+ 000000CD  B9 0000001C			mov ecx, 28
+ 000000D2  B3 1C			mov bl, 28
+ 000000D4			LeftBar:
+					; move cursor to row 30 col 1, then go up
+ 000000D4  8A F3			mov dh, bl
+ 000000D6  B2 01			mov dl, 1
+ 000000D8  E8 00000000 E		call GotoXY
+					; write the string space
+ 000000DD  A0 00000004 R		mov al, blank
+ 000000E2  E8 00000000 E		call WriteChar
+
+ 000000E7  FE CB			dec bl
+ 000000E9  49				dec ecx
+ 000000EA  75 E8			jnz LeftBar
+
+					; Set text color to green on black background
+ 000000EC  B8 00000002			mov eax, green + (black*16)
+ 000000F1  E8 00000000 E		call SetTextColor
+
+ 000000F6  C3				ret
+ 000000F7			initMap ENDP
+
+
+
+				; initialize the snake moving 1 pixel per second to the right
+ 000000F7			moveSnake PROC
+					; retrieve the current seconds (ch 10)
+					INVOKE GetLocalTime, ADDR sysTime
+ 000000F7  68 00000008 R   *	    push   OFFSET sysTime
+ 000000FC  E8 00000000 E   *	    call   GetLocalTime
+ 00000101  0F B7 05			movzx eax, sysTime.wSecond
+	   00000014 R
+					; get the next second
+ 00000108  8B D8			mov ebx, eax
+ 0000010A  43				inc ebx
+					;call WriteDec
+
+
+					; while statement for 1 second delay
+ 0000010B  B9 00000001			mov ecx, 1
+ 00000110			go:
+					INVOKE GetLocalTime, ADDR sysTime
+ 00000110  68 00000008 R   *	    push   OFFSET sysTime
+ 00000115  E8 00000000 E   *	    call   GetLocalTime
+ 0000011A  0F B7 05			movzx eax, sysTime.wSecond
+	   00000014 R
+					;call WriteDec
+				;delay:
+					; code to make a 1 second delay
+					; check if a second has passed
+ 00000121  3B C3			cmp eax, ebx
+					; if a second has passed end the delay
+ 00000123  74 02			jz enddelay
+					; if not, wait again
+ 00000125  EB E9			jmp go
+
+ 00000127			enddelay:
+					; update ebx to be eax +1
+ 00000127  8B D8			mov ebx, eax
+ 00000129  43				inc ebx
+
+					; code to move snake
+ 0000012A  66| 8B 15			mov dx, snakePOS
+	   00000006 R
+
+					;row stays the same, but change col
+ 00000131  FE C2			inc dl
+ 00000133  E8 00000000 E		call GotoXY
+					; write the string eyes
+ 00000138  A0 00000002 R		mov al, eyes
+ 0000013D  E8 00000000 E		call WriteChar
+
+					; save current snake position
+ 00000142  66| 89 15			mov snakePOS, dx
+	   00000006 R
+ 00000149  E8 00000003			call debug
+
+ 0000014E  EB C0		jmp go
+ 00000150			endwhile:
+ 00000150  C3				ret
+ 00000151			moveSnake ENDP
+
+ 00000151			debug PROC
+ 00000151  66| 52			push dx
+ 00000153  B6 00			mov dh, 0
+ 00000155  B2 00			mov dl, 0
+ 00000157  E8 00000000 E		call GotoXY
+ 0000015C  66| 5A			pop dx
+ 0000015E  E8 00000000 E		call DumpRegs
+ 00000163  C3				ret
+ 00000164			debug ENDP
+
 
 				END main
-Microsoft (R) Macro Assembler Version 14.44.35222.0	    03/23/26 12:33:34
+Microsoft (R) Macro Assembler Version 14.44.35222.0	    03/23/26 15:48:08
 main.asm						     Symbols 2 - 1
 
 
@@ -249,8 +353,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000006 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000A3 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000019 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000164 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -357,11 +461,18 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-initMap  . . . . . . . . . . . .	P Near	 0000005A _TEXT	Length= 00000049 Public STDCALL
-  TopBar . . . . . . . . . . . .	L Near	 0000006B _TEXT	
-  RightBar . . . . . . . . . . .	L Near	 0000008A _TEXT	
-initSnake  . . . . . . . . . . .	P Near	 00000011 _TEXT	Length= 00000049 Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000011 Public STDCALL
+debug  . . . . . . . . . . . . .	P Near	 00000151 _TEXT	Length= 00000013 Public STDCALL
+initMap  . . . . . . . . . . . .	P Near	 00000066 _TEXT	Length= 00000091 Public STDCALL
+  TopBar . . . . . . . . . . . .	L Near	 00000077 _TEXT	
+  RightBar . . . . . . . . . . .	L Near	 00000096 _TEXT	
+  BottomBar  . . . . . . . . . .	L Near	 000000B5 _TEXT	
+  LeftBar  . . . . . . . . . . .	L Near	 000000D4 _TEXT	
+initSnake  . . . . . . . . . . .	P Near	 00000016 _TEXT	Length= 00000050 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Public STDCALL
+moveSnake  . . . . . . . . . . .	P Near	 000000F7 _TEXT	Length= 0000005A Public STDCALL
+  go . . . . . . . . . . . . . .	L Near	 00000110 _TEXT	
+  enddelay . . . . . . . . . . .	L Near	 00000127 _TEXT	
+  endwhile . . . . . . . . . . .	L Near	 00000150 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -584,6 +695,7 @@ black  . . . . . . . . . . . . .	Number	 00000000h
 blank  . . . . . . . . . . . . .	Byte	 00000004 _DATA	
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
+currCOL  . . . . . . . . . . . .	Byte	 00000018 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 eyes . . . . . . . . . . . . . .	Byte	 00000002 _DATA	
@@ -597,6 +709,8 @@ lightMagenta . . . . . . . . . .	Number	 0000000Dh
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 red  . . . . . . . . . . . . . .	Number	 00000004h   
+snakePOS . . . . . . . . . . . .	Word	 00000006 _DATA	
+sysTime  . . . . . . . . . . . .	SYSTEMTIME  00000008 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 x  . . . . . . . . . . . . . . .	Byte	 00000000 _DATA	
