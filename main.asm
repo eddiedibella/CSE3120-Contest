@@ -11,6 +11,8 @@ INCLUDE Irvine32.inc
 	snakePOS WORD 0h
 	sysTime SYSTEMTIME <>
 	currCOL BYTE 0h
+	timeDelay DWORD 0h
+	timePassed DWORD 0h
 .code
 main PROC
 	
@@ -24,6 +26,7 @@ main PROC
 	call initMap
 
 	; initialize the snake moving 1 pixel per second to the right
+	mov timeDelay, 1000		; time delay in milliseconds
 	call moveSnake
 
 	; recommended next steps
@@ -164,35 +167,106 @@ initMap ENDP
 
 
 ; initialize the snake moving 1 pixel per second to the right
+; eax holds time of initial delay
+; ebx holds current time since delay started
+; edx holds time difference between eax and ebx
 moveSnake PROC
 	; retrieve the current seconds (ch 10)
 	INVOKE GetLocalTime, ADDR sysTime
-	movzx eax, sysTime.wSecond
-	; get the next second
+	movzx eax, sysTime.wMilliseconds
 	mov ebx, eax
-	inc ebx
+	; get that next second
+
+	;push eax
+	; do modulus to get the next second
+	;mov eax, ebx
+	;add eax, timeDelay	; move one second into future
+	;mov ebx, 1000
+	;div ebx			; leaves quotient in eax, remainder in edx
+	;pop eax
+
 	;call WriteDec
 
 
 	; while statement for 1 second delay
-	mov ecx, 1
+	mov ecx, 0
 go:
 	INVOKE GetLocalTime, ADDR sysTime
-	movzx eax, sysTime.wSecond
-	;call WriteDec
-;delay:
-	; code to make a 1 second delay
+	movzx eax, sysTime.wMilliseconds
+	call WriteDec
+delayLoop:
+	; code to make a 1 second delay (1000 ms)
+	push eax
+	INVOKE GetLocalTime, ADDR sysTime
+	movzx eax, sysTime.wMilliseconds
+	mov ebx, eax
+	pop eax
 	; check if a second has passed
+	; if eax is smaller than or equal to ebx, do normal difference
+	; ebx - eax = diff
 	cmp eax, ebx
+	jg elsestatement
+
+	push eax
+	push ebx
+	sub ebx, eax
+	mov edx, ebx
+	pop ebx
+	pop eax
+
+	jmp notelse
+elsestatement:
+	; if eax is bigger, do weird difference
+	; (1000 - eax) + (ebx) = diff
+	push eax
+	mov ecx, 1000
+	sub ecx, eax
+	mov eax, ecx
+	add eax, ebx
+	mov edx, eax
+	pop eax
+	
+notelse:
+	
+	; check if a second has passed
+	push eax
+	push ebx
+	mov eax, timePassed
+	mov ebx, timeDelay
+	; add the current time passed to the timePassed variable
+	add eax, edx
+	cmp eax, ebx
+
+	; update timePassed variable
+	mov timePassed, eax
+	;call WriteDec
+
+	pop ebx
+	pop eax
+
+	; update ebx time to eax time
+	mov eax, ebx
+
+	; if enough time passed (eax >= ebx), end delay 
+	jge enddelay
+
+	; if not time yet (eax < ebx), continue delay
+	jmp delayLoop
+
+
+	
+	;add eax, timeDelay	; move one second into future
+	;mov ebx, 1000
+	;div ebx			; leaves quotient in eax, remainder in edx
+
 	; if a second has passed end the delay
 	jz enddelay
 	; if not, wait again
 	jmp go
 
 enddelay:
-	; update ebx to be eax +1
-	mov ebx, eax
-	inc ebx
+	; update timePassed back to 0
+	mov timePassed, 0h
 
 	; code to move snake
 	mov dx, snakePOS
@@ -200,6 +274,10 @@ enddelay:
 	;row stays the same, but change col
 	inc dl
 	call GotoXY
+
+	; check if out of bounds
+	call checkBounds
+
 	; write the string eyes
 	mov al, eyes
 	call WriteChar
@@ -223,5 +301,29 @@ debug PROC
 	ret
 debug ENDP
 
+checkBounds PROC
+.data
+deathMsg BYTE "You have died!", 0
+;BadXCoordMsg BYTE "X-Coordinate out of range!",0Dh,0Ah,0
+;BadYCoordMsg BYTE "Y-Coordinate out of range!",0Dh,0Ah,0
+.code
+	.IF (DL < 0) || (DL > 119)
+	   ;mov  edx,OFFSET BadXCoordMsg
+	   mov  edx,OFFSET deathMsg
+	   call WriteString
+	   jmp  quit
+	.ENDIF
+	.IF (DH < 0) || (DH > 28)
+	   ;mov  edx,OFFSET BadYCoordMsg
+	   mov  edx,OFFSET deathMsg
+	   call WriteString
+	   jmp  quit
+	.ENDIF
+	;call Gotoxy
 
+quit:
+	ret
+checkBounds ENDP
+
+breakout:
 END main
