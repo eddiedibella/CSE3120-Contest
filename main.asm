@@ -13,6 +13,7 @@ INCLUDE Irvine32.inc
 	currCOL BYTE 0h
 	timeDelay DWORD 0h
 	timePassed DWORD 0h
+	direction WORD 90
 .code
 main PROC
 	
@@ -191,9 +192,10 @@ moveSnake PROC
 	; while statement for 1 second delay
 	mov ecx, 0
 go:
+	call handleInput
 	INVOKE GetLocalTime, ADDR sysTime
 	movzx eax, sysTime.wMilliseconds
-	call WriteDec
+	;call WriteDec
 delayLoop:
 	; code to make a 1 second delay (1000 ms)
 	push eax
@@ -227,7 +229,7 @@ elsestatement:
 	pop eax
 	
 notelse:
-	
+
 	; check if a second has passed
 	push eax
 	push ebx
@@ -240,6 +242,7 @@ notelse:
 	; update timePassed variable
 	mov timePassed, eax
 	;call WriteDec
+	;call debug
 
 	pop ebx
 	pop eax
@@ -271,12 +274,42 @@ enddelay:
 	; code to move snake
 	mov dx, snakePOS
 
-	;row stays the same, but change col
-	inc dl
+	push ax
+	; if direction is right
+	mov ax, direction
+	cmp ax, 90
+	jnz next
+	inc dl		;row stays the same, but change col
+	jmp enddir
+next:
+	; if direction is down
+	cmp ax, 180
+	jnz next2
+	inc dh		;row changes, but col stays the same
+	jmp enddir
+next2:
+	; if direction is left
+	cmp ax, 270
+	jnz next3
+	dec dl		;row stays the same, but change col
+	jmp enddir
+next3:
+	; if direction is up
+	cmp ax, 0
+	jnz enddir
+	dec dh		;row changes, but col stays the same
+enddir:
 	call GotoXY
+	pop ax
 
-	; check if out of bounds
+
+	; check if out of bounds (uses ecx to return)
+	push ecx
 	call checkBounds
+	cmp ecx, 0
+	pop ecx
+	jl endwhile
+
 
 	; write the string eyes
 	mov al, eyes
@@ -298,9 +331,11 @@ debug PROC
 	call GotoXY
 	pop dx
 	call DumpRegs
+
 	ret
 debug ENDP
 
+; returns negative number in ecx if out of bounds
 checkBounds PROC
 .data
 deathMsg BYTE "You have died!", 0
@@ -311,19 +346,107 @@ deathMsg BYTE "You have died!", 0
 	   ;mov  edx,OFFSET BadXCoordMsg
 	   mov  edx,OFFSET deathMsg
 	   call WriteString
+	   mov ecx, -1
 	   jmp  quit
 	.ENDIF
 	.IF (DH < 0) || (DH > 28)
 	   ;mov  edx,OFFSET BadYCoordMsg
 	   mov  edx,OFFSET deathMsg
 	   call WriteString
+	   mov ecx, -1
 	   jmp  quit
 	.ENDIF
-	;call Gotoxy
-
+	mov ecx, 1
 quit:
 	ret
 checkBounds ENDP
+
+handleInput PROC
+	call readKey ; ch 5
+	; if zero flag is zero
+	jz quit
+	; and AL is not zero
+	cmp al, 0
+	jz quit
+
+	; read the character
+	push dx
+	mov dh, 0
+	mov dl, 0
+	call GotoXY
+	pop dx
+	call WriteChar
+
+	; check direction of snake
+	; up = 0, ascii of w = 119
+	; right = 90, ascii of d = 100
+	; down = 180, ascii of s = 115
+	; left = 270, ascii of a = 97
+	mov bx, direction
+	; if direction is right, only accept up and down as input (119 or 115)
+	cmp bx, 90
+	jnz next
+	cmp al, 119
+	jz validinput
+	cmp al, 115
+	jz validinput
+	jmp quit
+next:
+	; if direction is down, only accept left and right as input (97 or 100)
+	cmp bx, 180
+	jnz next2
+	cmp al, 97
+	jz validinput
+	cmp al, 100
+	jz validinput
+	jmp quit
+next2:
+	; if direction is left, only accept up and down as input (119 or 115)
+	cmp bx, 270
+	jnz next3
+	cmp al, 119
+	jz validinput
+	cmp al, 115
+	jz validinput
+	jmp quit
+next3:
+	; if direction is up, only accept left and right as input (97 or 100)
+	cmp bx, 0
+	jnz quit
+	cmp al, 97
+	jz validinput
+	cmp al, 100
+	jz validinput
+	jmp quit
+
+; check which valid input it is, then set the correct direction
+validinput:
+	; if up (119)
+	cmp al, 119
+	jnz cv
+	mov direction, 0
+	jmp quit
+cv:
+	; if right (100)
+	cmp al, 100
+	jnz cv2
+	mov direction, 90
+	jmp quit
+cv2:
+	; if down (115)
+	cmp al, 115
+	jnz cv3
+	mov direction, 180
+	jmp quit
+cv3:
+	; if left (97)
+	cmp al, 97
+	jnz quit
+	mov direction, 270
+
+quit:
+	ret
+handleInput ENDP
 
 breakout:
 END main
