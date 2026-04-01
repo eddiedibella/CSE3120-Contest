@@ -100,6 +100,94 @@ initSnake PROC
 	ret
 initSnake ENDP
 
+;added in the apple system that will randomy choose an apple location
+; from columns 2 to 118 and from rows 2 to 27 
+; it also makes sure the apple doesn't spawn on the snake
+spawnApple PROC
+newApple:
+	; bounds from columns 2 to 118
+	mov eax, 117
+	call RandomRange
+	add eax, 2
+	mov appleCol, al
+
+	; bounds from rows 2 to 27
+	mov eax, 26
+	call RandomRange
+	add eax, 2
+	mov appleRow, al
+
+	; this will make sure there will not be an apple on the snake 
+	mov al, appleCol
+	cmp al, snakeCols[0]
+	jne checkBody1
+	mov al, appleRow
+	cmp al, snakeRows[0]
+	je newApple
+
+checkBody1:
+	mov al, appleCol
+	cmp al, snakeCols[1]
+	jne checkBody2
+	mov al, appleRow
+	cmp al, snakeRows[1]
+	je newApple
+
+checkBody2:
+	mov al, appleCol
+	cmp al, snakeCols[2]
+	jne drawApple
+	mov al, appleRow
+	cmp al, snakeRows[2]
+	je newApple
+
+drawApple:
+	mov dl, appleCol
+	mov dh, appleRow
+	call GotoXY
+	mov al, '@'
+	call WriteChar
+	ret
+spawnApple ENDP
+
+; responsible for removing the tail for every position the snake moves
+; without this the snake would get increasingly longer the farther it travels
+eraseTail PROC
+	mov dl, tailCol
+	mov dh, tailRow
+	call GotoXY
+	mov al, blank
+	call WriteChar
+	ret
+eraseTail ENDP
+
+; will be a centralized hub for the drawing of the snakes body 
+drawSnake PROC
+	; responsible for drawing the tail
+	mov dl, snakeCols[2]
+	mov dh, snakeRows[2]
+	call GotoXY
+	mov al, x
+	call WriteChar
+
+	; will draw the middle section
+	mov dl, snakeCols[1]
+	mov dh, snakeRows[1]
+	call GotoXY
+	mov al, x
+	call WriteChar
+
+	; will now draw the head
+	mov dl, snakeCols[0]
+	mov dh, snakeRows[0]
+	call GotoXY
+	mov al, eyes
+	call WriteChar
+
+	mov snakePOS, dx
+	ret
+drawSnake ENDP
+
 initMap PROC
 ; This procedure initializes the map bounds (colored in yellow)
 
