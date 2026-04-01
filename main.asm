@@ -10,7 +10,7 @@ INCLUDE Irvine32.inc
 	blank BYTE " ",0
 	snakePOS WORD 0h
 	timeDelay DWORD 0h
-	trickStart DWORD 0
+	tickStart DWORD 0
 	direction WORD 90
 
 	applesEaten DWORD 0
