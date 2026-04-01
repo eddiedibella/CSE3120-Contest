@@ -38,6 +38,7 @@ main PROC
 	call spawnApple
 	; initialize the snake moving 1 pixel per second to the right
 	mov timeDelay, 1000		; initial time delay in milliseconds
+	call flushInput
 	call moveSnake
 
 	; recommended next steps
@@ -62,6 +63,16 @@ main PROC
 	exit
 main ENDP
 
+; added flushInput for the start of the game
+; if flushing wasn't added there would be no buffer the game could end immediately
+flushInput PROC
+flushLoop:
+    call readKey
+    jz flushDone 
+ 	jmp flushLoop     
+flushDone:
+    ret
+flushInput ENDP
 
 initSnake PROC
 ; This procedure initializes the snake in the middle of the screen
