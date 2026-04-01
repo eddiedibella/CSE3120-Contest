@@ -6,6 +6,12 @@
 ; use W A S D to navigate the snake around the mao
 ; if the game is over press r to start another game
 
+; SETUP INSTRUCTIONS
+; build the project in visual studio
+; open a terminal window
+; navigate to the debug folder inside of the project folder
+; run the .exe file project.exe 
+
 INCLUDE Irvine32.inc
 
 .data 
